@@ -1,32 +1,33 @@
 package com.scoober.kafkascalalab
 
-import org.apache.kafka.common.utils.Scheduler
+import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
+import com.scoober.kafkascalalab.AttackProducer.Shoot
 
-object Lab {
+import scala.concurrent.duration.DurationInt
 
-  import java.util.Properties
+object Lab extends App {
 
-  import org.apache.kafka.clients.producer._
+  override def main(args: Array[String]): Unit = {
+    print("Scala Shooter starts")
 
-  def main(args: Array[String]) {
-    val props = new Properties()
-    props.put("bootstrap.servers", "kafka:9092")
-    props.put("client.id", "scala-lab-producer")
-    props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-    props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+    val labActorSystem = ActorSystem("ScalaLab")
 
-    val producer = new KafkaProducer[String, String](props)
+    labActorSystem.actorOf(Props(new Lab()))
+  }
+}
 
-    val TOPIC = "scala-pub"
+class Lab extends Actor with ActorLogging {
 
-    for (i <- 1 to 50) {
-      val record = new ProducerRecord(TOPIC, "key", s"hello new $i")
-      producer.send(record)
+  import context.dispatcher
+
+  override def preStart(): Unit = {
+    val attackProducer = context.actorOf(AttackProducer.props(0))
+    context.system.scheduler.schedule(2.second, 200.microseconds, attackProducer, Shoot(7))
+  }
+
+  override def receive: Receive = {
+    case _ => {
+      log.info("Nothing expected here")
     }
-
-    val record = new ProducerRecord(TOPIC, "key", "the end " + new java.util.Date)
-    producer.send(record)
-
-    producer.close()
   }
 }
