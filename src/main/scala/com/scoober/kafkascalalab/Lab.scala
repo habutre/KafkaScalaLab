@@ -21,8 +21,8 @@ class Lab extends Actor with ActorLogging {
   import context.dispatcher
 
   override def preStart(): Unit = {
-    val attackProducer = context.actorOf(AttackProducer.props(0))
-    context.system.scheduler.schedule(2.second, 200.microseconds, attackProducer, Shoot(7))
+    val attackProducer = context.actorOf(AttackProducer.props())
+    context.system.scheduler.schedule(2.second, 200.microseconds, attackProducer, Shoot())
   }
 
   override def receive: Receive = {
