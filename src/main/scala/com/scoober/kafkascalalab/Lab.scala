@@ -1,6 +1,7 @@
 package com.scoober.kafkascalalab
 
 import akka.actor.{Actor, ActorLogging, ActorSystem, Props}
+import com.scoober.kafkascalalab.AttackConsumer.Shooted
 import com.scoober.kafkascalalab.AttackProducer.Shoot
 
 import scala.concurrent.duration.DurationInt
@@ -22,7 +23,10 @@ class Lab extends Actor with ActorLogging {
 
   override def preStart(): Unit = {
     val attackProducer = context.actorOf(AttackProducer.props())
-    context.system.scheduler.schedule(2.second, 200.microseconds, attackProducer, Shoot())
+    val attackConsumer = context.actorOf(AttackConsumer.props())
+
+    context.system.scheduler.schedule(1.second, 200.milliseconds, attackProducer, Shoot())
+    context.system.scheduler.schedule(1.second, 200.milliseconds, attackConsumer, Shooted())
   }
 
   override def receive: Receive = {

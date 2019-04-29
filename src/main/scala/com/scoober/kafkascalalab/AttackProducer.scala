@@ -3,7 +3,7 @@ package com.scoober.kafkascalalab
 import java.util.Properties
 
 import akka.actor.{Actor, ActorLogging, Props}
-import com.scoober.kafkascalalab.AttackProducer.{Shoot, Stop}
+import com.scoober.kafkascalalab.AttackProducer.{Shoot, Shutdown}
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 
 import scala.util.Random
@@ -13,11 +13,19 @@ object AttackProducer {
 
   final case class Shoot()
 
-  final case class Stop()
+  final case class Shutdown()
 
 }
 
 class AttackProducer() extends Actor with ActorLogging {
+
+  override def receive: Receive = {
+    case Shoot() =>
+      shoot()
+
+    case Shutdown() =>
+      context.system.terminate()
+  }
 
   def shoot() = {
     //TODO move the producer create and destroy to specific methods and messages
@@ -34,15 +42,5 @@ class AttackProducer() extends Actor with ActorLogging {
     val record = new ProducerRecord(TOPIC, "scala-shoot", s"${Random.nextInt(10)}")
     producer.send(record)
     producer.close()
-  }
-
-  override def receive: Receive = {
-    case Shoot() =>
-      shoot()
-
-    case Stop() => {
-      if (1 == 0)
-        context.system.terminate()
-    }
   }
 }

@@ -1,15 +1,30 @@
 package com.scoober.kafkascalalab
 
+import java.util
 import java.util.Properties
 
 import akka.actor.{Actor, ActorLogging, Props}
-import org.apache.kafka.clients.consumer.{Consumer, ConsumerConfig, KafkaConsumer}
+import com.scoober.kafkascalalab.AttackConsumer.{Shooted, Shutdown}
+import org.apache.kafka.clients.consumer.KafkaConsumer
 
 object AttackConsumer {
-  def props: Props = Props(new AttackConsumer())
+  def props(): Props = Props(new AttackConsumer())
+
+  final case class Shooted()
+
+  final case class Shutdown()
+
 }
 
-class AttackConsumer extends Actor  with ActorLogging {
+class AttackConsumer extends Actor with ActorLogging {
+  override def receive: Receive = {
+    case Shooted() =>
+      absorve()
+
+    case Shutdown() =>
+      context.system.terminate()
+  }
+
   def absorve(): Unit = {
     val properties: Properties = new Properties()
     properties.put("group.id", "elixir-pub-consumer")
@@ -19,10 +34,9 @@ class AttackConsumer extends Actor  with ActorLogging {
     properties.put("enable.auto.commit", "true")
     properties.put("auto.commit.interval.ms", "5000")
 
-    val consumer : KafkaConsumer[String, String] = new KafkaConsumer[String, String](properties)
-    val topics: List[String] = List[String]("elixir-pub")
+    val consumer: KafkaConsumer[String, String] = new KafkaConsumer(properties)
+    val topics = util.Arrays.asList("elixir-pub")
 
     consumer.subscribe(topics)
   }
-  override def receive: Receive = ???
 }
