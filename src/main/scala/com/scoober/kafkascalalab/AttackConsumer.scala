@@ -19,13 +19,13 @@ object AttackConsumer {
 class AttackConsumer extends Actor with ActorLogging {
   override def receive: Receive = {
     case Shooted() =>
-      absorve()
+      shooted()
 
     case Shutdown() =>
       context.system.terminate()
   }
 
-  def absorve(): Unit = {
+  def shooted(): Unit = {
     val properties: Properties = new Properties()
     properties.put("group.id", "elixir-pub-consumer")
     properties.put("bootstrap.servers", "localhost:9092")
