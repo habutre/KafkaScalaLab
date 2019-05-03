@@ -19,15 +19,25 @@ object AttackProducer {
 
 class AttackProducer() extends Actor with ActorLogging {
 
+  val producer = buildKafkaProducer
+
   override def receive: Receive = {
     case Shoot() =>
       shoot()
 
     case Shutdown() =>
+      producer.close()
       context.system.terminate()
   }
 
   def shoot() = {
+    val TOPIC = "scala-pub"
+    val record = new ProducerRecord(TOPIC, "scala-shoot", s"${Random.nextInt(10)}")
+
+    producer.send(record)
+  }
+
+  private def buildKafkaProducer = {
     //TODO move the producer create and destroy to specific methods and messages
     val props = new Properties()
     props.put("bootstrap.servers", "kafka:9092")
@@ -35,12 +45,6 @@ class AttackProducer() extends Actor with ActorLogging {
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
 
-    val producer = new KafkaProducer[String, String](props)
-
-    val TOPIC = "scala-pub"
-
-    val record = new ProducerRecord(TOPIC, "scala-shoot", s"${Random.nextInt(10)}")
-    producer.send(record)
-    producer.close()
+    new KafkaProducer[String, String](props)
   }
 }
