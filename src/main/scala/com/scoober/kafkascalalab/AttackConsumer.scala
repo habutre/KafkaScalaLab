@@ -23,7 +23,7 @@ class AttackConsumer extends Actor with ActorLogging {
   def buildConsumer(): KafkaConsumer[String, String] = {
     val properties: Properties = new Properties()
     properties.put("group.id", "elixir-pub-consumer")
-    properties.put("bootstrap.servers", "localhost:9092")
+    properties.put("bootstrap.servers", "kafka:9092")
     properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
