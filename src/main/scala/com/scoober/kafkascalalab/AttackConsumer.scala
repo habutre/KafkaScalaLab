@@ -13,14 +13,29 @@ object AttackConsumer {
   def props(): Props = Props(new AttackConsumer())
 
   final case class Shooted()
-
   final case class Shutdown()
-
 }
 
 class AttackConsumer extends Actor with ActorLogging {
+  val consumer: KafkaConsumer[String, String] = buildConsumer()
 
-  def buildConsumer(): KafkaConsumer[String, String] = {
+  override def receive: Receive = {
+    case Shooted() =>
+      shooted()
+
+    case Shutdown() =>
+      context.system.terminate()
+  }
+
+  private def shooted(): Unit = {
+
+    val msg = consumer.poll(Duration.of(200, ChronoUnit.MILLIS))
+
+    log.info("In total {}x messages were read", msg.count())
+    msg.iterator().forEachRemaining(m => log.info(m.value()))
+  }
+
+  private def buildConsumer(): KafkaConsumer[String, String] = {
     val properties: Properties = new Properties()
     properties.put("group.id", "elixir-pub-consumer")
     properties.put("bootstrap.servers", "kafka:9092")
@@ -37,24 +52,5 @@ class AttackConsumer extends Actor with ActorLogging {
     consumer.subscribe(topics)
 
     consumer
-  }
-
-  val consumer: KafkaConsumer[String, String] = buildConsumer()
-
-
-  override def receive: Receive = {
-    case Shooted() =>
-      shooted()
-
-    case Shutdown() =>
-      context.system.terminate()
-  }
-
-  def shooted(): Unit = {
-
-    val msg = consumer.poll(Duration.of(200, ChronoUnit.MILLIS))
-
-    log.info("In total {}x messages were read", msg.count())
-    msg.iterator().forEachRemaining(m => log.info(m.value()))
   }
 }
