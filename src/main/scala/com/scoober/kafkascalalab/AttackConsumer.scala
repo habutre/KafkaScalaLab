@@ -47,7 +47,7 @@ class AttackConsumer extends Actor with ActorLogging {
     properties.put("auto.commit.interval.ms", "5000")
 
     val consumer: KafkaConsumer[String, String] = new KafkaConsumer(properties)
-    val topics = util.Arrays.asList("elixir-pub")
+    val topics = util.Arrays.asList("attacks")
 
     consumer.subscribe(topics)
 

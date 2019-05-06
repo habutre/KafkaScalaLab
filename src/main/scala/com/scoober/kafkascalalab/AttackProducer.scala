@@ -28,16 +28,20 @@ class AttackProducer() extends Actor with ActorLogging {
   }
 
   private def shoot() = {
-    val TOPIC = "scala-pub"
-    val record = new ProducerRecord(TOPIC, "scala-shoot", s"${Random.nextInt(10)}")
+    val msg = Random.nextInt(10)
+    val record = new ProducerRecord("attacks", 1, "scala-pub", s"${msg}")
+
+    log.info("Preparing to publish a record: ", s"${msg}")
 
     producer.send(record)
+
+    log.info("Published a shot with power {} to attacks topic", s"${msg}")
   }
 
   private def buildKafkaProducer = {
     val props = new Properties()
     props.put("bootstrap.servers", "kafka:9092")
-    props.put("client.id", "scala-lab-producer")
+    props.put("client.id", "kafka-lab-scala-producer")
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
 
