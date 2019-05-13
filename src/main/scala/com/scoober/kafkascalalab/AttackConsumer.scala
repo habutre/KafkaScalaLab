@@ -28,11 +28,15 @@ class AttackConsumer extends Actor with ActorLogging {
   }
 
   private def shooted(): Unit = {
-
     val msg = consumer.poll(Duration.of(200, ChronoUnit.MILLIS))
 
-    log.info("In total {}x messages were read", msg.count())
-    msg.iterator().forEachRemaining(m => log.info(m.value()))
+    msg.iterator().forEachRemaining(m => {
+      log.info("MESSAGE: {}", m)
+      if(m.key() == "elixir-pub")
+        log.info("message: {}", m)
+      else
+        log.info("I am not interested on my own messages: {}", m)
+    })
   }
 
   private def buildConsumer(): KafkaConsumer[String, String] = {
@@ -41,8 +45,6 @@ class AttackConsumer extends Actor with ActorLogging {
     properties.put("bootstrap.servers", "kafka:9092")
     properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
     properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer")
-    properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-    properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     properties.put("enable.auto.commit", "true")
     properties.put("auto.offset.reset", "latest")
     properties.put("auto.commit.interval.ms", "5000")
@@ -51,7 +53,6 @@ class AttackConsumer extends Actor with ActorLogging {
     val topics = util.Arrays.asList("attacks")
 
     consumer.subscribe(topics)
-
     consumer
   }
 }
