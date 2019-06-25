@@ -29,7 +29,7 @@ class AttackProducer() extends Actor with ActorLogging {
 
   private def shoot() = {
     val msg = Random.nextInt(10)
-    val record = new ProducerRecord("attacks", 1, "scala-pub", s"$msg")
+    val record = new ProducerRecord("attacks", 0, "scala-pub", s"$msg")
 
     log.info("Preparing to publish a record: {}", s"$msg")
 

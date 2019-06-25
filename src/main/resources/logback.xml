@@ -1,0 +1,8 @@
+// src/main/resources/logback.xml
+<configuration>    
+  <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender"/>
+
+  <root level="info">
+    <appender-ref ref="stdout"/>
+  </root>
+</configuration>

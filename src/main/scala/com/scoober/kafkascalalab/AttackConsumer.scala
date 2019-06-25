@@ -45,8 +45,9 @@ class AttackConsumer extends Actor with ActorLogging {
   private def confirmMessageAck(key: String, msg: ConsumerRecord[String,String]): Unit = key match {
     case "scala-pub" => log.info("I am not interested on my own messages: {}", msg)
 
-    case "exilir-pub" => {
+    case "elixir-pub" => {
       val ackMsg = new ProducerRecord("interactions", 0,"scala-damage", s"${msg.value()}")
+      log.info("Published an ack with power {} to interactions topic: {}", msg.value(), msg)
       producer.send(ackMsg)
     }
 
