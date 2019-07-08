@@ -7,7 +7,8 @@ import java.util.Properties
 
 import akka.actor.{Actor, ActorLogging, Props}
 import com.scoober.kafkascalalab.AttackConsumer.{Shooted, Shutdown}
-import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.clients.consumer.{ConsumerRecord, KafkaConsumer}
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 
 object AttackConsumer {
   def props(): Props = Props(new AttackConsumer())
@@ -18,6 +19,7 @@ object AttackConsumer {
 
 class AttackConsumer extends Actor with ActorLogging {
   val consumer: KafkaConsumer[String, String] = buildConsumer()
+  val producer: KafkaProducer[String, String] = buildInteractionsProducer()
 
   override def receive: Receive = {
     case Shooted() =>
@@ -31,12 +33,25 @@ class AttackConsumer extends Actor with ActorLogging {
     val msg = consumer.poll(Duration.of(200, ChronoUnit.MILLIS))
 
     msg.iterator().forEachRemaining(m => {
-      log.info("MESSAGE: {}", m)
-      if(m.key() == "elixir-pub")
-        log.info("message: {}", m)
-      else
-        log.info("I am not interested on my own messages: {}", m)
+      confirmMessageAck(m.key(), m)
+//      log.info("MESSAGE: {}", m)
+//      if(m.key() == "elixir-pub")
+//        log.info("message: {}", m)
+//      else
+//        log.info("I am not interested on my own messages: {}", m)
     })
+  }
+
+  private def confirmMessageAck(key: String, msg: ConsumerRecord[String,String]): Unit = key match {
+    case "scala-pub" => log.info("I am not interested on my own messages: {}", msg)
+
+    case "elixir-pub" => {
+      val ackMsg = new ProducerRecord("interactions", 0,"scala-damage", s"${msg.value()}")
+      log.info("Published an ack with power {} to interactions topic: {}", msg.value(), msg)
+      producer.send(ackMsg)
+    }
+
+    case _ => log.info("Unknown message: {}", msg)
   }
 
   private def buildConsumer(): KafkaConsumer[String, String] = {
@@ -54,5 +69,15 @@ class AttackConsumer extends Actor with ActorLogging {
 
     consumer.subscribe(topics)
     consumer
+  }
+
+  private def buildInteractionsProducer() = {
+    val props = new Properties()
+    props.put("bootstrap.servers", "kafka:9092")
+    props.put("client.id", "kafka-lab-scala-producer")
+    props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+    props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+
+    new KafkaProducer[String, String](props)
   }
 }
