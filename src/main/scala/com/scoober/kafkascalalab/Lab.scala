@@ -26,7 +26,7 @@ class Lab extends Actor with ActorLogging {
     val attackConsumer = context.actorOf(AttackConsumer.props())
 
     context.system.scheduler.schedule(1.second, 200.milliseconds, attackProducer, Shoot())
-    context.system.scheduler.schedule(1.second, 200.milliseconds, attackConsumer, Shooted())
+    context.system.scheduler.schedule(1.second, 100.milliseconds, attackConsumer, Shooted())
   }
 
   override def receive: Receive = {

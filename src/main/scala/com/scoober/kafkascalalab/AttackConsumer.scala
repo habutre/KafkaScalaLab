@@ -34,11 +34,6 @@ class AttackConsumer extends Actor with ActorLogging {
 
     msg.iterator().forEachRemaining(m => {
       confirmMessageAck(m.key(), m)
-//      log.info("MESSAGE: {}", m)
-//      if(m.key() == "elixir-pub")
-//        log.info("message: {}", m)
-//      else
-//        log.info("I am not interested on my own messages: {}", m)
     })
   }
 
