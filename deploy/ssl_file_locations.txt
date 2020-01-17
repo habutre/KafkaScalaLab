@@ -1,0 +1,4 @@
+All files were copied from this folder:
+~/SideProjects/cp-docker-images/examples/kafka-cluster-ssl/secrets
+
+The client files were copied from producer since they are identical

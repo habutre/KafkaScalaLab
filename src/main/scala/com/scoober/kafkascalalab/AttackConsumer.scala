@@ -67,11 +67,19 @@ class AttackConsumer extends Actor with ActorLogging {
   }
 
   private def buildInteractionsProducer() = {
+
     val props = new Properties()
-    props.put("bootstrap.servers", "kafka:9092")
+    props.put("bootstrap.servers", "kafka:19092, kafka:29092, kafka:39092")
     props.put("client.id", "kafka-lab-scala-producer")
     props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
     props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+    props.put("security.protocol", "SSL")
+    props.put("ssl.endpoint.identification.algorithm", "")
+    props.put("ssl.truststore.location", "deploy/kafka.consumer.truststore.jks")
+    props.put("ssl.truststore.password", "confluent")
+    props.put("ssl.keystore.location", "deploy/kafka.consumer.keystore.jks")
+    props.put("ssl.keystore.password", "confluent")
+    props.put("ssl.key.password", "confluent")
 
     new KafkaProducer[String, String](props)
   }
